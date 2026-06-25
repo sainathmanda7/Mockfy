@@ -1,0 +1,72 @@
+[
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-25T18:59:00+05:30",
+    "text": "Hello Anand, welcome to the interview. I've reviewed your background and I'm looking forward to learning more about your experience. To start, could you briefly introduce yourself and tell me what project or achievement you're most proud of?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-25T18:59:31+05:30",
+    "text": "hi I am Sainath Manda and recently have graduated from CMR Engineering College so my best project is optionex which is a multi agent driven pipeline system for cic and Amul files"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-25T18:59:33+05:30",
+    "text": "That sounds fascinating. Building a multi-agent system for CICD is no small task. Could you explain how the different agents work together to process those files?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-25T19:34:58+05:30",
+    "text": "Hello Saath Manda. Welcome to the interview. I have reviewed your background and I'm looking forward to learning more about you. To start, could you briefly introduce yourself and tell me what project or achievement you're most proud of?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-25T19:35:31+05:30",
+    "text": "That Rubik's Cube solver sounds fascinating, especially using BFS and DFS. Pivoting slightly, your profile mentions you worked on the Linux kernel fixing lock issues. Can you describe the specific problem you addressed and how you solved it?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-25T19:36:01+05:30",
+    "text": "impresses that you were able to fix a deadlock in that critical area. Looking at your experience with the Mern stack, you mentioned optimizing a postgress QL schema for 1000 concurrent rules per second. What specific strategies did you use to handle that kind of load?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-25T19:36:27+05:30",
+    "text": "Leveraging goes concurrency models is a smart way to handle that. You've also built an AI student bot with web sockets. What was the biggest challenge with managing real-time state in that context and how did you overcome it?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-25T19:36:55+05:30",
+    "text": "Handling free API limitations with real-time systems can be tricky. For my final question, thinking about your distributed TCP server project, what are some key challenges with scaling a server like that to handle many concurrent connections? Interview complete."
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-25T19:37:15+05:30",
+    "text": "Interview complete."
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-25T19:37:24+05:30",
+    "text": "hi my name is Sainath Munda I have recently graduated from CMR Engineering College so I am most proud of my project a Rubik's Cube solve which is the DSA algorithm solve it solve Rubik's Cube using the bfh advanced algorithms it was just a deadlock situation it was between the people and the control FS system so I saw the deadlock using the policy changes and two Linux strategy"
+  }
+]

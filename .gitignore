@@ -15,6 +15,9 @@ node_modules
 # Testing
 coverage
 
+# Ignore backend test folder
+apps/backend/test/
+
 # Turbo
 .turbo
 
@@ -36,3 +39,4 @@ yarn-error.log*
 # Misc
 .DS_Store
 *.pem
+apps/backend/test/
