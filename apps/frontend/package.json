@@ -12,11 +12,15 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.61.3",
     "@clerk/react": "^6.11.0",
+    "@react-three/drei": "^10.7.7",
+    "@react-three/fiber": "^9.6.1",
+    "@react-three/postprocessing": "^3.0.4",
     "axios": "^1.18.1",
-    "framer-motion": "^12.41.0",
+    "framer-motion": "^12.42.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
-    "react-router-dom": "^7.18.0"
+    "react-router-dom": "^7.18.0",
+    "three": "^0.185.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -24,6 +28,7 @@
     "@types/node": "^24.12.3",
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.185.0",
     "@vitejs/plugin-react": "^6.0.1",
     "autoprefixer": "^10.5.1",
     "eslint": "^10.3.0",

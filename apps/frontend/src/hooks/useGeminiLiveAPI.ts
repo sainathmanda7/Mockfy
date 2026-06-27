@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 
 interface AudioChunk {
   data: string;   // base64
@@ -243,10 +243,10 @@ export const useGeminiLiveAPI = (wsUrl: string) => {
         
         const payload = { 
           realtimeInput: { 
-            audio: { 
+            mediaChunks: [{ 
               mimeType: 'audio/pcm;rate=16000', 
               data: btoa(bin) 
-            } 
+            }] 
           } 
         };
         
