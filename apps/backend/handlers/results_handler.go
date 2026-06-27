@@ -23,7 +23,7 @@ func EvaluateInterviewHandler(w http.ResponseWriter, r *http.Request) {
 	evaluationJSON, err := llm_service.EvaluateInterview()
 	if err != nil {
 		fmt.Println("LLM Error:", err)
-		http.Error(w, "Failed to evaluate interview", http.StatusInternalServerError)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 

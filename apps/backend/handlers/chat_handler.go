@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/sainathmanda7/ai-mock-backend/audio"
+	"github.com/sainathmanda7/ai-mock-backend/db"
 	"github.com/sainathmanda7/ai-mock-backend/prompts"
 	"github.com/gorilla/websocket"
 )
@@ -52,7 +53,7 @@ func saveToInterviewFile(speaker, interviewID, text string) {
 }
 
 func transcribeAudio(audioBytes []byte, apiKey string) (string, error) {
-	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + apiKey
+	url := "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-live-preview:generateContent?key=" + apiKey
 
 	// Prepend standard 16-bit PCM WAV header for STT processing
 	wavHeader := audio.CreateWAVHeader(uint32(len(audioBytes)), 24000, 1, 16)
@@ -142,6 +143,32 @@ func LiveChatHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	candidateProfileJSON := string(initPayload)
 	log.Println("Received Candidate Profile Handshake")
+
+	// ==========================================
+	// 👉 PASTE THIS NEW NEON DB BLOCK HERE 👈
+	// ==========================================
+
+	// Parse the JSON briefly just to grab the candidate's real name for the database
+	candidateNameForDb := "Unknown Candidate" 
+	var rawProfile map[string]interface{}
+	if err := json.Unmarshal([]byte(candidateProfileJSON), &rawProfile); err == nil {
+		if name, ok := rawProfile["candidateName"].(string); ok {
+			candidateNameForDb = name
+		}
+	}
+
+	// Save the raw JSON string into the Neon database
+	query := `INSERT INTO interviews (candidate_name, profile_data) VALUES ($1, $2)`
+	_, dbErr := db.DB.Exec(query, candidateNameForDb, candidateProfileJSON)
+
+	if dbErr != nil {
+		log.Println("Database Error: Failed to save to Neon:", dbErr)
+	} else {
+		log.Println("💾 Successfully saved to Neon Postgres!")
+	}
+	// ==========================================
+	// 👉 END OF NEW CODE 👈
+	// ==========================================
 
 	apiKey := os.Getenv("GEMINI_API_KEY")
 	geminiWSURL := "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContent?key=" + apiKey
@@ -234,6 +261,7 @@ func LiveChatHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
+			log.Printf("Forwarding message: %s", string(p))
 			if err := geminiConn.WriteMessage(messageType, p); err != nil {
 				log.Println("Failed to forward to Gemini:", err)
 				break

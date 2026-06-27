@@ -168,6 +168,7 @@ export const useGeminiLiveAPI = (wsUrl: string) => {
           for (const part of parts) {
             // Check for inlineData
             if (part?.inlineData?.data) {
+              console.log(Date.now(), "AI AUDIO RECEIVED");
               const mimeType = part.inlineData.mimeType || 'audio/pcm;rate=24000';
               setAiState('speaking');
               audioQueueRef.current.push({ data: part.inlineData.data, mimeType });
@@ -194,97 +195,129 @@ export const useGeminiLiveAPI = (wsUrl: string) => {
     return () => { disposed = true; ws.close(); };
   }, [wsUrl, drainQueue]);
 
-  // ── Microphone recording ──────────────────────────────────────
-  const startRecording = useCallback(async () => {
-    if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
-    if (!audioUnlockedRef.current) await initAudioPlayback();
-    
-    // Reset transcripts for the new turn
-    setUserTranscript('');
-    userTranscriptRef.current = '';
-    setAiTranscript('');
+    const turnEndedRef = useRef(false);
 
-    // Start Web Speech API for real-time transcription
-    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      const recognition = new SpeechRecognition();
-      recognition.continuous = true;
-      recognition.interimResults = true;
-      recognition.onresult = (event: any) => {
-        let transcript = '';
-        for (let i = 0; i < event.results.length; ++i) {
-          transcript += event.results[i][0].transcript;
-        }
-        setUserTranscript(transcript);
-        userTranscriptRef.current = transcript;
-      };
-      recognition.start();
-      recognitionRef.current = recognition;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true },
-      });
-      mediaStreamRef.current = stream;
-      const ctx = new AudioContext({ sampleRate: 16000 });
-      recordCtxRef.current = ctx;
-      const source = ctx.createMediaStreamSource(stream);
-      const processor = ctx.createScriptProcessor(4096, 1, 1);
+    const startRecording = useCallback(async () => {
+      turnEndedRef.current = false;
+      if (!wsRef.current || wsRef.current.readyState !== WebSocket.OPEN) return;
+      if (!audioUnlockedRef.current) await initAudioPlayback();
       
-      processor.onaudioprocess = (e) => {
-        const f32 = e.inputBuffer.getChannelData(0);
-        const i16 = new Int16Array(f32.length);
-        for (let i = 0; i < f32.length; i++) i16[i] = Math.max(-32768, Math.min(32767, f32[i] * 32768));
-        const u8 = new Uint8Array(i16.buffer);
+      // Reset transcripts for the new turn
+      setUserTranscript('');
+      userTranscriptRef.current = '';
+      setAiTranscript('');
+  
+      // Start Web Speech API for real-time transcription
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
+        recognition.onresult = (event: any) => {
+          let transcript = '';
+          for (let i = 0; i < event.results.length; ++i) {
+            transcript += event.results[i][0].transcript;
+          }
+          setUserTranscript(transcript);
+          userTranscriptRef.current = transcript;
+        };
+        recognition.start();
+        recognitionRef.current = recognition;
+      }
+  
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: { sampleRate: 16000, channelCount: 1, echoCancellation: true, noiseSuppression: true },
+        });
+        mediaStreamRef.current = stream;
+        const ctx = new AudioContext({ sampleRate: 16000 });
+        recordCtxRef.current = ctx;
         
-        let bin = '';
-        for (let i = 0; i < u8.length; i++) bin += String.fromCharCode(u8[i]);
+        await ctx.audioWorklet.addModule('/pcm-processor.js');
         
-        const payload = { 
-          realtimeInput: { 
-            mediaChunks: [{ 
-              mimeType: 'audio/pcm;rate=16000', 
-              data: btoa(bin) 
-            }] 
-          } 
+        const source = ctx.createMediaStreamSource(stream);
+        const processor = new AudioWorkletNode(ctx, 'pcm-processor');
+        
+        processor.port.onmessage = (e) => {
+          if (turnEndedRef.current) return;
+  
+          const buffer = e.data; // ArrayBuffer
+          const u8 = new Uint8Array(buffer);
+          let bin = '';
+          for (let i = 0; i < u8.length; i++) {
+            bin += String.fromCharCode(u8[i]);
+          }
+          
+          const payload = { 
+            realtimeInput: { 
+              audio: { 
+                mimeType: `audio/pcm;rate=${ctx.sampleRate}`, 
+                data: btoa(bin) 
+              } 
+            } 
+          };
+          
+          console.log(
+            Date.now(), "SEND AUDIO",
+            "packet:",
+            payload.realtimeInput.audio.mimeType,
+            u8.length,
+            payload.realtimeInput.audio.data.length
+          );
+          
+          if (wsRef.current?.readyState === WebSocket.OPEN) {
+            wsRef.current.send(JSON.stringify(payload));
+          }
         };
         
-        if (wsRef.current?.readyState === WebSocket.OPEN) {
-          wsRef.current.send(JSON.stringify(payload));
-        }
-      };
+        const gainNode = ctx.createGain();
+        gainNode.gain.value = 0; // Mute it so user doesn't hear themselves
+        
+        source.connect(processor);
+        processor.connect(gainNode);
+        gainNode.connect(ctx.destination); // Required to keep the audio graph active in modern browsers
+        
+        processorRef.current = processor as any;
+        setIsRecording(true);
+        setAiState('listening');
+      } catch (err) { console.error('[Mic] error:', err); }
+    }, [initAudioPlayback]);
+  
+    const stopRecording = useCallback(async () => {
+      turnEndedRef.current = true;
+  
+      // Disconnect processor immediately to stop receiving audio chunks
+      processorRef.current?.disconnect(); 
+      processorRef.current = null;
       
-      source.connect(processor);
-      processor.connect(ctx.destination);
-      processorRef.current = processor;
-      setIsRecording(true);
-      setAiState('listening');
-    } catch (err) { console.error('[Mic] error:', err); }
-  }, [initAudioPlayback]);
-
-  const stopRecording = useCallback(() => {
-    // Send final transcript AND turn completion in a single guaranteed message
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ 
-        clientContent: { turnComplete: true },
-        userTranscript: userTranscriptRef.current 
-      }));
-    }
-
-    // Stop Web Speech API
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      recognitionRef.current = null;
-    }
-
-    processorRef.current?.disconnect(); processorRef.current = null;
-    mediaStreamRef.current?.getTracks().forEach(t => t.stop()); mediaStreamRef.current = null;
-    if (recordCtxRef.current && recordCtxRef.current.state !== 'closed') recordCtxRef.current.close();
-    recordCtxRef.current = null;
-    
-    setIsRecording(false);
-  }, []);
+      // Give any in-flight port.onmessage events a brief moment to clear
+      await new Promise(r => setTimeout(r, 50));
+  
+      // Send final transcript AND turn completion safely
+      if (wsRef.current?.readyState === WebSocket.OPEN) {
+        console.log(Date.now(), "SEND TURN_COMPLETE");
+        wsRef.current.send(JSON.stringify({ 
+          clientContent: { turnComplete: true },
+          userTranscript: userTranscriptRef.current 
+        }));
+      }
+  
+      // Stop Web Speech API
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+        recognitionRef.current = null;
+      }
+  
+      mediaStreamRef.current?.getTracks().forEach(t => t.stop()); 
+      mediaStreamRef.current = null;
+      
+      if (recordCtxRef.current && recordCtxRef.current.state !== 'closed') {
+        recordCtxRef.current.close();
+      }
+      recordCtxRef.current = null;
+      
+      setIsRecording(false);
+    }, []);
 
   return { connect, startRecording, stopRecording, isRecording, aiState, initAudioPlayback, userTranscript, aiTranscript };
 };

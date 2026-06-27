@@ -76,7 +76,7 @@ export default function Interview() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-neutral-950 text-white gap-16 px-4 overflow-hidden">
+    <div className="flex flex-col items-center justify-center h-[calc(100vh-73px)] bg-neutral-950 text-white gap-16 px-4 overflow-hidden">
       <AnimatePresence mode="wait">
         <motion.p key={statusText} initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: 8 }}
           className="text-sm text-gray-400 tracking-wider text-center max-w-md">{statusText}</motion.p>

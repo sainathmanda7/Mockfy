@@ -17,6 +17,9 @@ func EvaluateInterview() (string, error) {
 	// Read the JSON file
 	fileBytes, err := os.ReadFile("Interview_File.json")
 	if err != nil {
+		if os.IsNotExist(err) {
+			return "", fmt.Errorf("No interview data found. Please complete an interview first.")
+		}
 		return "", fmt.Errorf("failed to read Interview_File.json: %v", err)
 	}
 

@@ -42,6 +42,34 @@ func FormatCandidateProfile(rawResume string, githubRepos []models.GitHubRepo) (
 		},
 		"generationConfig": map[string]interface{}{
 			"responseMimeType": "application/json",
+			"responseSchema": map[string]interface{}{
+				"type": "OBJECT",
+				"properties": map[string]interface{}{
+					"candidateName": map[string]interface{}{"type": "STRING"},
+					"summary": map[string]interface{}{"type": "STRING"},
+					"skills": map[string]interface{}{
+						"type": "OBJECT",
+						"properties": map[string]interface{}{
+							"languages": map[string]interface{}{"type": "ARRAY", "items": map[string]interface{}{"type": "STRING"}},
+							"frameworks": map[string]interface{}{"type": "ARRAY", "items": map[string]interface{}{"type": "STRING"}},
+							"tools": map[string]interface{}{"type": "ARRAY", "items": map[string]interface{}{"type": "STRING"}},
+						},
+					},
+					"experience": map[string]interface{}{
+						"type": "ARRAY",
+						"items": map[string]interface{}{
+							"type": "OBJECT",
+							"properties": map[string]interface{}{
+								"company": map[string]interface{}{"type": "STRING"},
+								"role": map[string]interface{}{"type": "STRING"},
+								"duration": map[string]interface{}{"type": "STRING"},
+								"bullets": map[string]interface{}{"type": "ARRAY", "items": map[string]interface{}{"type": "STRING"}},
+							},
+						},
+					},
+				},
+				"required": []string{"candidateName", "summary", "skills", "experience"},
+			},
 		},
 	}
 
@@ -133,5 +161,9 @@ func extractTextFromResponse(body []byte) (string, error) {
 		return "", fmt.Errorf("no text string in part")
 	}
 
-	return text, nil
+	text = strings.TrimSpace(text)
+	text = strings.TrimPrefix(text, "```json")
+	text = strings.TrimPrefix(text, "```")
+	text = strings.TrimSuffix(text, "```")
+	return strings.TrimSpace(text), nil
 }

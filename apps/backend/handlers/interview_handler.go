@@ -17,6 +17,13 @@ func StartInterviewHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("Recovered from panic in StartInterviewHandler: %v", r)
+			http.Error(w, "Internal Server Error (Panic)", http.StatusInternalServerError)
+		}
+	}()
+
 	authHeader := r.Header.Get("Authorization")
 	if authHeader == "" {
 		http.Error(w, "Missing Authorization header", http.StatusUnauthorized)

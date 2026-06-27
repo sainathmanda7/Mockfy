@@ -68,5 +68,110 @@
     "speaker": "User",
     "timestamp": "2026-06-25T19:37:24+05:30",
     "text": "hi my name is Sainath Munda I have recently graduated from CMR Engineering College so I am most proud of my project a Rubik's Cube solve which is the DSA algorithm solve it solve Rubik's Cube using the bfh advanced algorithms it was just a deadlock situation it was between the people and the control FS system so I saw the deadlock using the policy changes and two Linux strategy"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-26T14:58:34+05:30",
+    "text": "Hello, Sinda. Welcome to the interview. I'm a senior technical interviewer and I've reviewed your background. I'm looking forward to learning more about your experience. To start, could you tell me about the project or achievement you're most proud of?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-26T14:58:56+05:30",
+    "text": "I am most agent at one.com it connects the gate up with the websites using cd5 Plus"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-26T14:59:47+05:30",
+    "text": "Hello signoff. My name is Alex and I'm a technical interviewer here. I've reviewed your profile and I'm looking forward to this discussion. To start, you've contributed to some pretty significant projects from HPX to the Linux kernel. Which of your projects or achievements to date are you most proud of and why?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-26T15:00:00+05:30",
+    "text": "I am most proud of hpx achievement where my too cool request or not in data hpx which is an international organization so it was about parallel computing and C++ stuff"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-26T15:01:59+05:30",
+    "text": "Hello Sainath Manda. Welcome to the interview. I'm a senior technical interviewer and I've reviewed your background. I'm looking forward to learning more about you. To start, could you briefly introduce yourself and tell me what project or achievement you're most proud of?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-26T15:02:17+05:30",
+    "text": "That's interesting. Your work on HPX, particularly implementing parallel algorithms, sounds valuable. Could you describe a specific technical challenge you faced during that contribution and how you solved it?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-26T15:02:43+05:30",
+    "text": "I understand, navigating peer pressure can be tough. Moving to your technical experience, in your Linux kernel contributions, you dealt with lock inversion and hash collisions. What's your approach to debugging such complex low-level issues? And how do you ensure your fixes don't introduce new problems?"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "AI",
+    "timestamp": "2026-06-26T15:02:53+05:30",
+    "text": "Thorough checking is definitely key. That concludes my questions. Interview complete."
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-27T17:42:19+05:30",
+    "text": "I am proud of the library management system"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-27T17:44:00+05:30",
+    "text": "most proud of library management system"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-27T17:44:35+05:30",
+    "text": "I am most proud of library management system"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-27T17:55:32+05:30",
+    "text": "I am most proud of library management system"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-27T17:57:38+05:30",
+    "text": "I am most proud of library management system ok ok sending audio packet PCM rate so"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-27T19:00:46+05:30",
+    "text": "well hi so the project which I am very proud of his library management system which a values the chicken checkouts and the number of users came to the library and without the books it's due dates and etc"
+  },
+  {
+    "user_id": "user-1",
+    "interview_id": "mock-interview-session",
+    "speaker": "User",
+    "timestamp": "2026-06-27T19:18:04+05:30",
+    "text": "yeah hi so I most proud of library management system which evaluate the incoming members and outgoing members and count the number of books that the members has taken using a very high data structures and all separate next development"
   }
 ]

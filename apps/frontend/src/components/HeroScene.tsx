@@ -111,18 +111,6 @@ function collectMaterials(root: THREE.Object3D): THREE.Material[] {
       list.forEach((m) => {
         m.transparent = true;
         
-        // Add subtle metallic reflections and keep existing base color
-        const mat = m as THREE.MeshStandardMaterial;
-        mat.metalness = 0.8;
-        mat.roughness = 0.25;
-        
-        // Add subtle purple emissive glow to specific parts
-        const name = mesh.name.toLowerCase();
-        if (name.includes('eye') || name.includes('lens') || name.includes('visor') || name.includes('glow')) {
-          mat.emissive = new THREE.Color('#7c3aed');
-          mat.emissiveIntensity = 2.0;
-        }
-
         found.push(m);
       });
     }
@@ -291,9 +279,10 @@ function GestureActor({ groupRef, phase }: ActorProps) {
 interface RobotProps {
   phase: ScenePhase;
   setPhase: (phase: ScenePhase) => void;
+  initialPhase?: ScenePhase;
 }
 
-function Robot({ phase, setPhase }: RobotProps) {
+function Robot({ phase, setPhase, initialPhase }: RobotProps) {
   const moveGroup = useRef<THREE.Group>(null!);
   const runGroup = useRef<THREE.Group>(null!);
   const gestureGroup = useRef<THREE.Group>(null!);
@@ -338,11 +327,14 @@ function Robot({ phase, setPhase }: RobotProps) {
     }
   });
 
+  const startPos = initialPhase === 'gesture' ? TARGET_POS : START_POS;
+  const startRotY = initialPhase === 'gesture' ? FACING_ROTATION_Y : ENTRY_ROTATION_Y;
+
   return (
     <group
       ref={moveGroup}
-      position={[START_POS.x, START_POS.y, START_POS.z]}
-      rotation={[0, ENTRY_ROTATION_Y, 0]}
+      position={[startPos.x, startPos.y, startPos.z]}
+      rotation={[0, startRotY, 0]}
     >
       <group ref={runGroup}>
         <RunActor groupRef={runGroup} phase={phase} progressRef={progressRef} />
@@ -443,7 +435,7 @@ const ctaVariants = {
   },
 };
 
-function BrandingOverlay({ visible }: { visible: boolean }) {
+function BrandingOverlay({ visible, isAuthenticated }: { visible: boolean; isAuthenticated?: boolean }) {
   return (
     <div className="absolute inset-0 pointer-events-none flex items-center justify-end px-[8vw] z-20">
       <AnimatePresence>
@@ -467,8 +459,8 @@ function BrandingOverlay({ visible }: { visible: boolean }) {
             </motion.p>
 
             <motion.div variants={ctaVariants} className="mt-6 pointer-events-auto">
-              <a href="/auth" style={ctaButtonStyle}>
-                Get Started
+              <a href={isAuthenticated ? "/upload" : "/auth"} style={ctaButtonStyle}>
+                {isAuthenticated ? "Upload Resume" : "Get Started"}
                 <span className="transition-transform duration-300 inline-block">&#8594;</span>
               </a>
             </motion.div>
@@ -510,8 +502,8 @@ function ParticleFallback() {
 /*  Main export                                                         */
 /* ================================================================== */
 
-export default function HeroScene() {
-  const [phase, setPhase] = useState<ScenePhase>('entering');
+export default function HeroScene({ isAuthenticated = false }: { isAuthenticated?: boolean }) {
+  const [phase, setPhase] = useState<ScenePhase>(isAuthenticated ? 'gesture' : 'entering');
   const [webglFailed, setWebglFailed] = useState(false);
 
   const handleWebGLError = useCallback(() => {
@@ -582,7 +574,7 @@ export default function HeroScene() {
                   stays plain black - matching Phase 1 - while the models load,
                   instead of the whole canvas vanishing behind a spinner. */}
               <Suspense fallback={null}>
-                <Robot phase={phase} setPhase={setPhase} />
+                <Robot phase={phase} setPhase={setPhase} initialPhase={isAuthenticated ? 'gesture' : 'entering'} />
               </Suspense>
 
               <OrbitControls
@@ -605,7 +597,7 @@ export default function HeroScene() {
 
       {webglFailed && <ParticleFallback />}
 
-      <BrandingOverlay visible={titleVisible} />
+      <BrandingOverlay visible={titleVisible} isAuthenticated={isAuthenticated} />
 
 
     </section>
