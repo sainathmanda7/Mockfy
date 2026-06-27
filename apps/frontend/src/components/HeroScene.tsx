@@ -10,6 +10,7 @@ import {
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useGLTF, useAnimations, OrbitControls } from '@react-three/drei';
 import { motion, AnimatePresence } from 'framer-motion';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import type { ReactNode } from 'react';
 
@@ -105,9 +106,23 @@ function collectMaterials(root: THREE.Object3D): THREE.Material[] {
   root.traverse((obj) => {
     const mesh = obj as THREE.Mesh;
     if (mesh.isMesh && mesh.material) {
+      if (isDev) console.log('[HeroScene] Mesh:', mesh.name);
       const list = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
       list.forEach((m) => {
         m.transparent = true;
+        
+        // Add subtle metallic reflections and keep existing base color
+        const mat = m as THREE.MeshStandardMaterial;
+        mat.metalness = 0.8;
+        mat.roughness = 0.25;
+        
+        // Add subtle purple emissive glow to specific parts
+        const name = mesh.name.toLowerCase();
+        if (name.includes('eye') || name.includes('lens') || name.includes('visor') || name.includes('glow')) {
+          mat.emissive = new THREE.Color('#7c3aed');
+          mat.emissiveIntensity = 2.0;
+        }
+
         found.push(m);
       });
     }
@@ -261,7 +276,7 @@ function GestureActor({ groupRef, phase }: ActorProps) {
 
   return (
     <group ref={modelRef}>
-      <primitive object={scene} scale={MODEL_SCALE} position={[0, -0.7, 0]} />
+      <primitive object={scene} scale={MODEL_SCALE} />
     </group>
   );
 }
@@ -313,7 +328,7 @@ function Robot({ phase, setPhase }: RobotProps) {
     } else if (phase === 'stopped') {
       progressRef.current = 1;
       stopClock.current += delta;
-      group.position.y = Math.sin(stopClock.current * 2) * 0.004; // tiny settle, not a full idle loop
+      group.position.y = TARGET_POS.y + Math.sin(stopClock.current * 2) * 0.004; // tiny settle, not a full idle loop
       if (!gestureFired.current && stopClock.current >= STOP_HOLD) {
         gestureFired.current = true;
         setPhase('gesture');
@@ -579,6 +594,10 @@ export default function HeroScene() {
                 autoRotate={false}
                 target={[0, 0.35, 0]}
               />
+
+              <EffectComposer disableNormalPass>
+                <Bloom luminanceThreshold={1} mipmapBlur intensity={1.5} />
+              </EffectComposer>
             </Canvas>
           </Suspense>
         </WebGLErrorBoundary>
@@ -588,14 +607,7 @@ export default function HeroScene() {
 
       <BrandingOverlay visible={titleVisible} />
 
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: titleVisible ? 0.6 : 0 }}
-        transition={{ delay: 1.3, duration: 0.8 }}
-      >
-        <div className="w-6 h-6 border-r-2 border-b-2 border-white/40 rotate-45 animate-[hero-bounce_1.8s_ease-in-out_infinite]" />
-      </motion.div>
+
     </section>
   );
 }
