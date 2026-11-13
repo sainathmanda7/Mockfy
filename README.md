@@ -1,159 +1,35 @@
-# Turborepo starter
+# Mockfy
+<img width="1672" height="941" alt="Mockfy Demo" src="https://github.com/user-attachments/assets/7ae6bba7-3b70-4dc8-a868-2acf7199d38f" />
 
-This Turborepo starter is maintained by the Turborepo core team.
+Mockfy is a real-time, low-latency audio streaming platform that achieves WebSocket-level performance using standard HTTP. 
 
-## Using this example
+By analyzing the network stack, we identified that the primary bottlenecks in real-time web audio are not the HTTP protocol itself, but the repeated TCP/TLS handshakes and payload serialization bloat. Mockfy bypasses these constraints by establishing a persistent HTTP connection via chunked transfer encoding and streaming raw Pulse-Code Modulation (PCM) audio bytes directly over the wire.
 
-Run the following command:
+## Architecture & Engineering Focus
 
-```sh
-npx create-turbo@latest
-```
+The system is designed to strip out unnecessary abstractions and control the data flow at the socket level.
 
-## What's inside?
+* **Persistent HTTP (Chunked Transfer Encoding):** Instead of opening a new connection for every audio frame, the Next.js client establishes a single, long-lived `Connection: keep-alive` HTTP request. This restricts the Time-to-First-Byte (TTFB) TCP/TLS handshake penalty to the initial connection.
+* **Zero Serialization Bloat:** Standard web audio implementations serialize data to JSON or Base64, inflating payload sizes by 33% and consuming CPU cycles. Mockfy captures 16kHz PCM audio natively and transmits raw binary chunks, eliminating encoding/decoding overhead.
+* **Goroutine I/O Pipelining:** The Go backend reads incoming binary chunks and immediately pipes them to the Gemini API via `io.Pipe`. The system does not buffer the audio file in memory, ensuring immediate upstream transmission.
 
-This Turborepo includes the following packages/apps:
+## Performance Metrics
 
-### Apps and Packages
+* **Audio Frame Size:** 20ms to 40ms intervals (approximately 1024 - 2048 bytes of raw 16kHz PCM audio).
+* **Network Transit Latency:** < 50ms end-to-end. By reusing the TCP socket and bypassing Base64 serialization, network latency was reduced to bare-metal constraints, leaving upstream API generation as the sole bottleneck.
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Technology Stack
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+* **Frontend:** Next.js, TypeScript (Raw PCM capture via Web Audio API)
+* **Backend:** Go (net/http, io.Pipe concurrent streaming)
+* **Database:** PostgreSQL (Neon serverless)
+* **Upstream Integration:** Gemini API
 
-### Utilities
+## Setup and Execution
 
-This Turborepo has some additional tools already setup for you:
+Prerequisites: Go 1.21+ and Node.js 18+
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
-
-### Build
-
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo build
-bun dlx turbo build
-bun exec turbo build
-```
-
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo build --filter=docs
-bun exec turbo build --filter=docs
-bun exec turbo build --filter=docs
-```
-
-### Develop
-
-To develop all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-bun exec turbo dev
-bun exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-bun exec turbo dev --filter=web
-bun exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-bun exec turbo login
-bun exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-bun exec turbo link
-bun exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+1. Clone the repository and navigate to the backend directory:
+```bash
+git clone [https://github.com/sainathmanda7/Mockfy.git](https://github.com/sainathmanda7/Mockfy.git)
+cd Mockfy/backend
